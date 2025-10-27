@@ -113,4 +113,4 @@ with gr.Blocks(theme=theme, title="DocuMind AI") as demo:
     reset_btn.click(reset, outputs=[status, chatbot])
 
 if __name__ == "__main__":
-    demo.launch(server_name="127.0.0.1", server_port=7860)
+    demo.launch()
