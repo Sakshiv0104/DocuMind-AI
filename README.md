@@ -1,13 +1,20 @@
 ---
-title: Documind Ai
-emoji: 🚀
-colorFrom: red
-colorTo: pink
+title: DocuMind AI
+emoji: 📚
+colorFrom: blue
+colorTo: purple
 sdk: gradio
-sdk_version: 5.49.1
+sdk_version: "4.44.0"
 app_file: app.py
 pinned: false
-license: apache-2.0
 ---
 
-Check out the configuration reference at https://huggingface.co/docs/hub/spaces-config-reference
+# DocuMind AI
+
+Multimodal RAG system for PDF and Word documents with AI-powered Q&A.
+
+## Features
+- 📄 Upload up to 5 PDFs or Word documents
+- 🖼️ Extracts and analyzes images from documents
+- 💬 Ask questions about your documents
+- 🤖 AI-powered responses using Groq
