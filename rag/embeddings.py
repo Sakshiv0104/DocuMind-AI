@@ -8,8 +8,12 @@ from config import CLIP_MODEL
 
 class CLIPEmbedder:
     def __init__(self):
-        self.model = CLIPModel.from_pretrained(CLIP_MODEL)
-        self.processor = CLIPProcessor.from_pretrained(CLIP_MODEL)
+        self.model = CLIPModel.from_pretrained('openai/clip-vit-base-patch32',
+         cache_dir='/data/.cache/models')
+        
+        self.processor = CLIPProcessor.from_pretrained(
+            'openai/clip-vit-base-patch32',cache_dir='/data/.cache/models')
+
         self.model.eval()
     
     def embed_text(self, text: str) -> np.ndarray:
