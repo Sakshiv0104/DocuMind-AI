@@ -3,11 +3,9 @@ import gradio as gr
 from rag.pipeline import RAGPipeline
 import os
 
-# Initialize pipeline
 pipeline = RAGPipeline()
 
 def upload_documents(files):
-    """Handle document uploads"""
     if not files:
         return "⚠️ Please select files to upload"
     
@@ -22,9 +20,8 @@ def upload_documents(files):
     return "\n".join(results)
 
 def answer_question(question, history):
-    """Handle user questions"""
     if not question.strip():
-        return history + [("", "⚠️ Please enter a question")]
+        return history
     
     try:
         answer = pipeline.query(question)
@@ -35,65 +32,34 @@ def answer_question(question, history):
         return history
 
 def clear_all():
-    """Clear everything"""
     global pipeline
     pipeline = RAGPipeline()
     return None, [], ""
 
-# Create Gradio interface
-with gr.Blocks(
-    title="📚 DocuMind AI",
-    theme=gr.themes.Soft(primary_hue="blue", secondary_hue="purple")
-) as demo:
+with gr.Blocks(title="DocuMind AI") as demo:
     gr.Markdown("# 📚 DocuMind AI")
     gr.Markdown("### Multimodal RAG System for PDF and Word Documents")
     
     with gr.Row():
-        with gr.Column(scale=1):
+        with gr.Column():
             gr.Markdown("## 📤 Upload Documents")
-            gr.Markdown("Upload up to 5 PDF or Word documents")
-            
-            file_input = gr.File(
-                label="Select Files",
-                file_count="multiple",
-                file_types=[".pdf", ".docx", ".doc"]
-            )
-            upload_btn = gr.Button("📥 Upload & Process", variant="primary")
-            upload_status = gr.Textbox(label="Upload Status", lines=5, interactive=False)
-            clear_btn = gr.Button("🗑️ Clear All", variant="secondary")
+            file_input = gr.Files(label="Select Files", file_types=[".pdf", ".docx", ".doc"])
+            upload_btn = gr.Button("Upload & Process")
+            upload_status = gr.Textbox(label="Status", lines=5)
+            clear_btn = gr.Button("Clear All")
         
-        with gr.Column(scale=2):
+        with gr.Column():
             gr.Markdown("## 💬 Ask Questions")
-            gr.Markdown("Ask questions about your uploaded documents")
-            
             chatbot = gr.Chatbot(label="Conversation", height=400)
-            question_input = gr.Textbox(
-                label="Your Question",
-                placeholder="Ask something about your documents...",
-                lines=2
-            )
-            ask_btn = gr.Button("🔍 Ask", variant="primary")
+            question_input = gr.Textbox(label="Your Question", lines=2)
+            ask_btn = gr.Button("Ask")
     
-    # Event handlers
-    upload_btn.click(fn=upload_documents, inputs=[file_input], outputs=[upload_status])
-    
-    ask_btn.click(
-        fn=answer_question,
-        inputs=[question_input, chatbot],
-        outputs=[chatbot]
-    ).then(lambda: "", outputs=[question_input])
-    
-    question_input.submit(
-        fn=answer_question,
-        inputs=[question_input, chatbot],
-        outputs=[chatbot]
-    ).then(lambda: "", outputs=[question_input])
-    
+    upload_btn.click(fn=upload_documents, inputs=file_input, outputs=upload_status)
+    ask_btn.click(fn=answer_question, inputs=[question_input, chatbot], outputs=chatbot)
+    question_input.submit(fn=answer_question, inputs=[question_input, chatbot], outputs=chatbot)
     clear_btn.click(fn=clear_all, outputs=[file_input, chatbot, upload_status])
     
-    gr.Markdown("---")
-    gr.Markdown("🤖 **Powered by CLIP, Groq, and LangChain** | Built with ❤️")
+    gr.Markdown("🤖 Powered by CLIP, Groq, and LangChain")
 
-# Launch for Hugging Face Spaces
 if __name__ == "__main__":
-    demo.launch(server_name="0.0.0.0", server_port=7860, share=False)
+    demo.queue().launch()
