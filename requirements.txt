@@ -1,0 +1,13 @@
+gradio
+google-generativeai
+torch
+torchvision
+transformers
+langchain
+langchain-community
+langchain-core
+PyMuPDF
+faiss-cpu
+Pillow
+python-dotenv
+python-docx
