@@ -1,116 +1,126 @@
-"""
-DocuMind AI - Clean Professional Interface
-"""
-
+"""Gradio interface for multimodal RAG system"""
 import gradio as gr
-from pathlib import Path
 from rag.pipeline import RAGPipeline
+import os
 
-pipeline = None
-processed_files = []
+# Initialize pipeline
+pipeline = RAGPipeline()
 
-def process_documents(doc_files):
-    global pipeline, processed_files
-    if not doc_files:
-        return "⚠️ Please select documents"
-    if len(doc_files) > 5:
-        return "⚠️ Maximum 5 documents"
-    try:
-        if pipeline is None:
-            pipeline = RAGPipeline()
-        processed_files = []
-        status = "Processing...\n\n"
-        for doc_file in doc_files:
-            file_path = Path(doc_file.name)
-            if file_path.suffix.lower() not in ['.pdf', '.docx', '.doc']:
-                status += f"❌ {file_path.name} - Unsupported\n"
-                continue
-            num = pipeline.index_document(file_path)
-            processed_files.append(file_path.name)
-            status += f"✅ {file_path.name} ({num} items)\n"
-        return status + f"\n✅ {len(processed_files)} document(s) ready!"
-    except Exception as e:
-        return f"❌ {str(e)}"
+def upload_documents(files):
+    """Handle document uploads"""
+    if not files:
+        return "⚠️ Please select files to upload"
+    
+    results = []
+    for file in files:
+        try:
+            num_indexed = pipeline.index_document(file.name)
+            results.append(f"✅ {os.path.basename(file.name)}: {num_indexed} items indexed")
+        except Exception as e:
+            results.append(f"❌ {os.path.basename(file.name)}: Error - {str(e)}")
+    
+    return "\n".join(results)
 
 def answer_question(question, history):
-    global pipeline, processed_files
-    if not pipeline or not processed_files:
-        return history + [[question, "⚠️ Upload documents first"]]
+    """Handle user questions"""
     if not question.strip():
-        return history + [[question, "⚠️ Enter a question"]]
+        return history + [("", "⚠️ Please enter a question")]
+    
     try:
         answer = pipeline.query(question)
-        return history + [[question, answer + f"\n\n📚 {', '.join(processed_files)}"]]
+        history.append((question, answer))
+        return history
     except Exception as e:
-        return history + [[question, f"❌ {str(e)}"]]
+        history.append((question, f"❌ Error: {str(e)}"))
+        return history
 
-def reset():
-    global pipeline, processed_files
-    pipeline = None
-    processed_files = []
-    return "Reset complete", []
+def clear_all():
+    """Clear everything"""
+    global pipeline
+    pipeline = RAGPipeline()
+    return None, [], ""
 
-# Use Base theme with custom settings
-theme = gr.themes.Base(
-    primary_hue="blue",
-    secondary_hue="gray",
-    neutral_hue="gray",
-).set(
-    body_background_fill="*neutral_50",
-    body_background_fill_dark="*neutral_900",
-    block_background_fill="white",
-    block_border_width="1px",
-    block_border_color="*neutral_200",
-    input_background_fill="white",
-    button_primary_background_fill="*primary_600",
-    button_primary_text_color="white",
-)
-
-with gr.Blocks(theme=theme, title="DocuMind AI") as demo:
-    
-    gr.HTML("""
-    <div style='background: linear-gradient(90deg, #4F46E5 0%, #7C3AED 100%); padding: 2.5rem; text-align: center; border-radius: 12px 12px 0 0;'>
-        <h1 style='color: white; margin: 0; font-size: 2rem;'>🧠 DocuMind AI</h1>
-        <p style='color: rgba(255,255,255,0.9); margin: 0.5rem 0 0 0;'>Intelligent Document Analysis Platform</p>
-    </div>
-    """)
+# Create Gradio interface
+with gr.Blocks(
+    title="📚 DocuMind AI",
+    theme=gr.themes.Soft(
+        primary_hue="blue",
+        secondary_hue="purple"
+    )
+) as demo:
+    gr.Markdown("# 📚 DocuMind AI")
+    gr.Markdown("### Multimodal RAG System for PDF and Word Documents")
     
     with gr.Row():
         with gr.Column(scale=1):
-            gr.Markdown("### 📤 Upload Documents")
-            doc_input = gr.File(label="Select files (max 5)", file_types=[".pdf", ".docx", ".doc"], file_count="multiple", type="filepath")
-            process_btn = gr.Button("🚀 Analyze Documents", variant="primary", size="lg")
-            status = gr.Textbox(label="Status", lines=10, interactive=False, placeholder="Ready...")
-            reset_btn = gr.Button("🔄 Reset", variant="secondary")
-            gr.Markdown("""
-            ---
-            **How to Use:**
-            1. Upload PDF/Word files
-            2. Click Analyze
-            3. Ask questions
-            4. Get AI answers
-            """)
+            gr.Markdown("## 📤 Upload Documents")
+            gr.Markdown("Upload up to 5 PDF or Word documents (max 5 pages each)")
+            
+            file_input = gr.File(
+                label="Select Files",
+                file_count="multiple",
+                file_types=[".pdf", ".docx", ".doc"]
+            )
+            upload_btn = gr.Button("📥 Upload & Process", variant="primary")
+            upload_status = gr.Textbox(
+                label="Upload Status",
+                lines=5,
+                interactive=False
+            )
+            clear_btn = gr.Button("🗑️ Clear All", variant="secondary")
         
         with gr.Column(scale=2):
-            gr.Markdown("### 💬 Chat")
-            chatbot = gr.Chatbot(height=450, avatar_images=("👤", "🤖"))
-            question = gr.Textbox(label="Your Question", placeholder="Ask anything...", lines=2)
-            with gr.Row():
-                send = gr.Button("📨 Send", variant="primary", scale=3)
-                clear = gr.Button("Clear", variant="secondary", scale=1)
+            gr.Markdown("## 💬 Ask Questions")
+            gr.Markdown("Ask questions about your uploaded documents")
+            
+            chatbot = gr.Chatbot(
+                label="Conversation",
+                height=400
+            )
+            question_input = gr.Textbox(
+                label="Your Question",
+                placeholder="Ask something about your documents...",
+                lines=2
+            )
+            ask_btn = gr.Button("🔍 Ask", variant="primary")
     
-    gr.Examples(
-        [["What are the main topics?"], ["Summarize the documents"], ["What images are shown?"]],
-        question
+    # Event handlers
+    upload_btn.click(
+        fn=upload_documents,
+        inputs=[file_input],
+        outputs=[upload_status]
     )
     
-    gr.Markdown("---\n**DocuMind AI** | Powered by Gemini AI | 🔒 Secure Processing")
+    ask_btn.click(
+        fn=answer_question,
+        inputs=[question_input, chatbot],
+        outputs=[chatbot]
+    ).then(
+        lambda: "",
+        outputs=[question_input]
+    )
     
-    process_btn.click(process_documents, doc_input, status)
-    send.click(answer_question, [question, chatbot], chatbot).then(lambda: "", outputs=question)
-    question.submit(answer_question, [question, chatbot], chatbot).then(lambda: "", outputs=question)
-    clear.click(lambda: [], outputs=chatbot)
-    reset_btn.click(reset, outputs=[status, chatbot])
+    question_input.submit(
+        fn=answer_question,
+        inputs=[question_input, chatbot],
+        outputs=[chatbot]
+    ).then(
+        lambda: "",
+        outputs=[question_input]
+    )
+    
+    clear_btn.click(
+        fn=clear_all,
+        outputs=[file_input, chatbot, upload_status]
+    )
+    
+    gr.Markdown("---")
+    gr.Markdown("🤖 **Powered by CLIP, Groq, and LangChain** | Built with ❤️")
 
+# Launch for Hugging Face Spaces
 if __name__ == "__main__":
-    demo.launch()
+    demo.launch(
+        server_name="0.0.0.0",
+        server_port=7860,
+        share=False
+    )
