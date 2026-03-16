@@ -2,24 +2,24 @@
 
 > Multimodal Retrieval-Augmented Generation (RAG) System for Intelligent Document Understanding
 
-## 🎯 Overview
+##  Overview
 
 DocuMind AI is an experimental multimodal RAG system designed to understand and answer questions about PDF and Word documents. This project explores cutting-edge techniques in semantic chunking, cross-modal embeddings, and context-aware language generation.
 
-## 🔥 Key Features
+## Key Features
 
-- 📄 Multimodal Document Processing - Extract text and images from PDFs and Word documents
-- 🖼️ Cross-modal Search - Query across text and images in a unified embedding space
-- 🚀 Production-Ready Deployment - End-to-end deployment on Hugging Face Spaces
-- ⚡ Real-time Q&A - Get intelligent answers from your documents instantly
-- 🔬 Experimental Framework - Designed for rapid iteration and technique exploration
+-  Multimodal Document Processing - Extract text and images from PDFs and Word documents
+-  Cross-modal Search - Query across text and images in a unified embedding space
+-  Production-Ready Deployment - End-to-end deployment on Hugging Face Spaces
+-  Real-time Q&A - Get intelligent answers from your documents instantly
+-  Experimental Framework - Designed for rapid iteration and technique exploration
 
-## 🌐 Live Demo
+##  Live Demo
 
 Try DocuMind AI on Hugging Face Spaces:
 https://huggingface.co/spaces/Sakshi0104/documind-ai
 
-## 🏗️ Architecture
+##  Architecture
 
 PDF/Word Document
     ↓
@@ -37,7 +37,7 @@ Context + Query → LLM (Groq - Llama 3.1 8B)
     ↓
 Intelligent Answer
 
-## 🧠 Technical Stack
+##  Technical Stack
 
 Current Implementation:
 - Chunking: Fixed-Size Character (500 chars, 50 overlap)
@@ -75,7 +75,7 @@ GROQ_API_KEY=your_groq_api_key_here
 python app.py
 Access at http://localhost:7860
 
-## 🚀 Hugging Face Spaces Deployment
+## Hugging Face Spaces Deployment
 
 Live Link: https://huggingface.co/spaces/Sakshi0104/documind-ai
 Status: Running (Free Tier - CPU)
@@ -95,14 +95,14 @@ LLM_MODEL = "llama-3.1-8b-instant"
 TEMPERATURE = 0.7
 MAX_TOKENS = 1024
 
-## 📊 Performance
+##  Performance
 
 Cold Start: 5-10 min
 Warm Query: ~30 sec
 Embedding Time: 2-5 sec
 Retrieval Speed: <100ms
 
-## 🎯 Vision
+##  Vision
 
 DocuMind AI represents my exploration of modern AI techniques in document understanding and retrieval-augmented generation. Through systematic experimentation with different chunking strategies, embedding models, and vector databases, I aim to build a robust, adaptable system that demonstrates best practices in multimodal AI.
 
@@ -111,6 +111,7 @@ This project showcases end-to-end deployment from local development through prod
 ## 🔗 Quick Links
 
 Live App: https://huggingface.co/spaces/Sakshi0104/documind-ai
+
 GitHub: https://github.com/Sakshiv0104/DocuMind-AI
 
 Status: In Active Development - Expect updates and experimental features!
